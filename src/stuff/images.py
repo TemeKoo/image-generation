@@ -1,16 +1,5 @@
 import pygame
 import random
-import os
-from datetime import datetime
-
-FILENAME = f"{datetime.now().strftime('%d%m%y_%H%M%S')}.png"
-FILEPATH = os.path.join(os.path.dirname(__file__) , "Images", FILENAME)
-
-SAVE = True
-WIDTH = 500
-HEIGHT = 500
-X = 1200
-Y = 700
 
 class Image():
     def __init__(self, width, height, screen):
@@ -111,33 +100,3 @@ class Image():
                 else:
                     self.complete = False
                     return True
-
-
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode(size=(X, Y), flags=(pygame.RESIZABLE))
-    image = Image(WIDTH, HEIGHT, screen)
-
-    event_queue = []
-    while True:
-        event_queue.extend(pygame.event.get())
-        if len(event_queue) > 0:
-            event = event_queue.pop(0)
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            elif event.type == pygame.VIDEORESIZE:
-                screen = pygame.display.set_mode(size=(event.w,event.h), flags=(pygame.RESIZABLE))
-                image.update(screen_change=True)
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    image.start(event.pos)
-
-        screen.fill((0,0,0))
-        save = image.update()
-        image.draw()
-        if save and SAVE:
-            pygame.image.save(screen, FILEPATH, "png")
-        pygame.display.flip()
-
-main()
