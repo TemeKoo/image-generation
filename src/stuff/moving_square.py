@@ -140,7 +140,7 @@ class MovingSquare(pygame.sprite.Sprite):
             self.color = change_color(self.color)
 
 
-class MovingSquareLoop(GenericLoop):
+class PrismLoop(GenericLoop):
     def __init__(self, screen_size):
         super().__init__()
         self.screen_handler = ScreenHandler(screen_size)
@@ -148,48 +148,37 @@ class MovingSquareLoop(GenericLoop):
 
     def start(self):
         self.squares.update(screen_size=self.screen_handler.size)
-        self.clock = pygame.time.Clock()
         self.started = False
-        self.__loop()
+        super().start()
 
-    def save(self):
-        # Dummy function, override to save image
-        pass
+    def updater(self):
+        super().updater()
+        if self.started:
+            if len(self.squares) == 0 and self.screen_handler.prism is not True:
+                self.started = False
+            self.squares.update()
+            self.screen_handler.update(to_draw=self.squares)
 
-    def __loop(self):
-        while(True):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.__exit_loop()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        x, y = event.pos
-                        new_square = MovingSquare((x, y))
-                        new_square.update(self.screen_handler.size)
-                        self.squares.add(new_square)
+    def event_handler(self, events: list):
+        super().event_handler(events)
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    x, y = event.pos
+                    new_square = MovingSquare((x, y))
+                    new_square.update(self.screen_handler.size)
+                    self.squares.add(new_square)
+                    self.started = True
+                elif event.button == 2:
+                    self.squares.update(change=True)
+                    self.screen_handler.update(blank=True)
+                elif event.button == 3:
+                    self.squares.empty()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.terminate()
+                if event.key == pygame.K_q:
+                    if self.screen_handler.update(prism=True):
                         self.started = True
-                    elif event.button == 2:
-                        self.squares.update(change=True)
-                        self.screen_handler.update(blank=True)
-                    elif event.button == 3:
-                        self.squares.empty()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        self.__exit_loop()
-                    if event.key == pygame.K_q:
-                        if self.screen_handler.update(prism=True):
-                            self.started = True
-                    if event.key == pygame.K_s:
-                        self.save()
-
-            if self.started:
-                if len(self.squares) == 0 and self.screen_handler.prism is not True:
-                    self.started = False
-                self.squares.update()
-                self.screen_handler.update(to_draw=self.squares)
-
-            self.clock.tick(60)
-
-    def __exit_loop(self):
-        pygame.quit()
-        exit()
+                if event.key == pygame.K_s:
+                    self.save()

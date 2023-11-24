@@ -1,6 +1,6 @@
 import pygame
 
-from .moving_square import MovingSquareLoop
+from .moving_square import PrismLoop
 
 SAVE = False
 WIDTH = 500
@@ -10,6 +10,6 @@ Y = 700
 
 pygame.init()
 
-class GameLoop(MovingSquareLoop):
+class GameLoop(PrismLoop):
     def __init__(self):
         super().__init__((X, Y))
