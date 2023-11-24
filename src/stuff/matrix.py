@@ -66,13 +66,16 @@ class FallingCharacter(pygame.sprite.Sprite):
         self.move_time = random.randint(0, 5)
         self.speed = random.randint(3, self.size-1)
         self.fade_time = random.randint(5, 10)
+        self.faders = []
 
     def update(self):
         self.rect.y += self.speed
         for i in range(self.speed+1):
-            if (self.rect.y-i)%self.size == 0:
+            fader_y = self.rect.y - i
+            if fader_y not in self.faders and (fader_y)%self.size == 0:
+                self.faders.append(fader_y)
                 fading_dict = {"layer": self._layer,
-                                "pos": (self.rect.x, self.rect.y-i),
+                                "pos": (self.rect.x, fader_y),
                                 "size": (self.size),
                                 "color": self.color,
                                 "fade_time": self.fade_time}
@@ -102,23 +105,36 @@ class MatrixLoop(GenericLoop):
     def __init__(self, screen_size: tuple[int, int]):
         self.screen_handler = MatrixScreenHandler(size=screen_size)
         self.matrix_characters = pygame.sprite.LayeredUpdates()
+        self.pause = False
+        self.chance = 50
         self.next_layer = 0
         super().__init__()
 
     def event_handler(self, events: list):
         super().event_handler(events)
         for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 3:
+                    self.pause = False if self.pause else True
+                if event.button == 4:
+                    self.chance += 1
+                if event.button == 5:
+                    self.chance -= 1
+                    if self.chance < 0:
+                        self.chance = 0
             if event.type == CREATE_FADING:
                 self.matrix_characters.add(FadingCharacter(event.size, event.pos, event.layer, event.color, event.fade_time))
 
     def updater(self):
         super().updater()
-        if random.randint(1, 2) == 1:
-            start_pos = random.randint(0, self.screen_handler.size[0])
-            self.matrix_characters.add(FallingCharacter(start_pos, self.screen_handler.size[1], self.next_layer))
-            self.next_layer += 1
-            if self.next_layer > len(self.matrix_characters):
-                self.next_layer = 0
-        self.matrix_characters.update()
+        if not self.pause:
+            if  random.randint(1, 100) < self.chance:
+                start_pos = random.randint(0, self.screen_handler.size[0])
+                self.matrix_characters.add(FallingCharacter(start_pos, self.screen_handler.size[1], self.next_layer))
+                self.next_layer += 1
+                if self.next_layer > len(self.matrix_characters):
+                    self.next_layer = 0
+            
+            self.matrix_characters.update()
         self.screen_handler.update(to_draw=self.matrix_characters)
-        print(len(self.matrix_characters))
+        print(self.chance, len(self.matrix_characters))
