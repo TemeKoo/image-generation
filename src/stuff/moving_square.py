@@ -1,7 +1,7 @@
 import pygame
 import random
 
-from .generic_classes import GenericLoop
+from .generic_classes import GenericScreenHandler, GenericLoop
 
 
 SQUARE_SIZE = 25, 75
@@ -29,9 +29,9 @@ def reverse_sign(integer: int):
     return 1 if integer < 0 else -1
 
 
-class ScreenHandler():
-    def __init__(self, size: tuple = (100, 100)):
-        self.screen = pygame.display.set_mode(size)
+class PrismScreenHandler(GenericScreenHandler):
+    def __init__(self, size: tuple):
+        super().__init__(size)
         self.screen.fill((255, 255, 255))
         pygame.display.flip()
 
@@ -42,6 +42,7 @@ class ScreenHandler():
         self.prism_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()), flags=pygame.SRCALPHA)
 
     def update(self, to_draw: pygame.sprite.Group = None, blank: bool = False, prism: bool = False):
+        super().update(to_draw=to_draw)
         if prism:
             if self.prism:
                 self.prism = False
@@ -51,9 +52,6 @@ class ScreenHandler():
                 self.prism_color = get_random_color(alpha=self.prism_alpha)
                 return True
             return
-
-        if to_draw is not None:
-            to_draw.draw(self.screen)
 
         if blank:
             if self.prism:
@@ -77,12 +75,6 @@ class ScreenHandler():
                 self.prism_color = (new_color[0], new_color[1], new_color[2], self.prism_alpha)
             else:
                 self.prism_counter += 1
-
-        pygame.display.flip()
-
-    @property
-    def size(self):
-        return self.screen.get_width(), self.screen.get_height()
 
 
 class MovingSquare(pygame.sprite.Sprite):
@@ -143,7 +135,7 @@ class MovingSquare(pygame.sprite.Sprite):
 class PrismLoop(GenericLoop):
     def __init__(self, screen_size):
         super().__init__()
-        self.screen_handler = ScreenHandler(screen_size)
+        self.screen_handler = PrismScreenHandler(screen_size)
         self.squares = pygame.sprite.Group()
 
     def start(self):
@@ -174,11 +166,6 @@ class PrismLoop(GenericLoop):
                     self.screen_handler.update(blank=True)
                 elif event.button == 3:
                     self.squares.empty()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.terminate()
                 if event.key == pygame.K_q:
                     if self.screen_handler.update(prism=True):
                         self.started = True
-                if event.key == pygame.K_s:
-                    self.save()
