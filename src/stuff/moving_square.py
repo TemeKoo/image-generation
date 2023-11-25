@@ -166,6 +166,7 @@ class PrismLoop(GenericLoop):
                     self.screen_handler.update(blank=True)
                 elif event.button == 3:
                     self.squares.empty()
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     if self.screen_handler.update(prism=True):
                         self.started = True

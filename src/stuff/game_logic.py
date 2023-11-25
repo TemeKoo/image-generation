@@ -11,7 +11,7 @@ Y = 700
 
 pygame.init()
 
-
+"""
 class GameLoop(MatrixLoop):
     def __init__(self):
         super().__init__((X, Y))
@@ -19,4 +19,3 @@ class GameLoop(MatrixLoop):
 class GameLoop(PrismLoop):
     def __init__(self):
         super().__init__((X, Y))
-"""
